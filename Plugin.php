@@ -22,7 +22,6 @@ if (!defined('__TYPECHO_ROOT_DIR__')) {
 class Plugin implements PluginInterface
 {
     /**
-    /**
      * 激活插件方法,如果激活失败,直接抛出异常
      */
     public static function activate()
