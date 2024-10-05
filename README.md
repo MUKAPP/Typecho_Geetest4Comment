@@ -2,7 +2,7 @@
 
 Typecho的极验4评论插件
 
-[演示地址](https://mukapp.top/)
+[演示地址](https://mukapp.top/archives/178/)
 
 ## 安装
 
