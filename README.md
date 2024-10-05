@@ -1,0 +1,2 @@
+# Typecho_Geetest4Comment
+Typecho的极验4评论插件
