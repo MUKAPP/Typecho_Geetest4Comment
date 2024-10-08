@@ -80,30 +80,62 @@ class Plugin implements PluginInterface
             <input type="hidden" id="pass_token" name="pass_token">
             <input type="hidden" id="gen_time" name="gen_time">
             <script>
-                var captchaInstance;
-                initGeetest4({
-                    captchaId: "' . Options::alloc()->plugin('Geetest4Comment')->captchaId . '",
-                }, function (captcha) {
-                    captchaInstance = captcha;
-                    captcha.appendTo("#captcha");
-                    captcha.onSuccess(function () {
-                        var result = captcha.getValidate();
-                        document.getElementById("lot_number").value = result.lot_number;
-                        document.getElementById("captcha_output").value = result.captcha_output;
-                        document.getElementById("pass_token").value = result.pass_token;
-                        document.getElementById("gen_time").value = result.gen_time;
+                var geetestCaptchaInstance;
+                var geetestCaptchaInitialized = false;
+
+                function initGeetestCaptcha() {
+                    // 判断 #comment-form 是否存在
+                    if (!document.querySelector("#comment-form")) {
+                        return;
+                    }
+
+                    // 判断 #captcha .geetest_captcha 是否存在
+                    console.log(document.querySelector("#captcha .geetest_captcha"), geetestCaptchaInitialized);
+                    if (document.querySelector("#captcha .geetest_captcha")) {
+                        // 清空 #captcha 下的所有子元素
+                        document.querySelector("#captcha").innerHTML = "";
+                        geetestCaptchaInitialized = false;
+                    }
+
+                    if (geetestCaptchaInitialized) {
+                        return;
+                    }
+
+                    geetestCaptchaInitialized = true;
+                    initGeetest4({
+                        captchaId: "' . Options::alloc()->plugin('Geetest4Comment')->captchaId . '",
+                    }, function (captcha) {
+                        geetestCaptchaInstance = captcha;
+                        captcha.appendTo("#captcha");
+                        captcha.onSuccess(function () {
+                            var result = captcha.getValidate();
+                            document.getElementById("lot_number").value = result.lot_number;
+                            document.getElementById("captcha_output").value = result.captcha_output;
+                            document.getElementById("pass_token").value = result.pass_token;
+                            document.getElementById("gen_time").value = result.gen_time;
+                        });
+                        captcha.onError(function (error) {
+                            alert("验证失败：" + error.msg + "，错误详情：" + error.desc.detail);
+                            captcha.reset();
+                        });
                     });
-                    captcha.onError(function (error) {
-                        alert("验证失败：" + error.msg + "，错误详情：" + error.desc.detail);
-                        captcha.reset();
-                    });
-                });
+                }
+
+                // 页面加载完成后初始化验证码
+                console.log("页面加载完成");
+                initGeetestCaptcha();
 
                 // 在表单提交时重置验证码
-                $("#comment-form").submit(function () {
-                    if (captchaInstance) {
-                        captchaInstance.reset();
+                document.querySelector("#comment-form").addEventListener("submit", function () {
+                    if (geetestCaptchaInstance) {
+                        geetestCaptchaInstance.reset();
                     }
+                });
+
+                // 监听 AJAX 完成事件，重新初始化验证码
+                $(document).ajaxComplete(function() {
+                    console.log("AJAX 完成");
+                    initGeetestCaptcha();
                 });
             </script>
         ';
